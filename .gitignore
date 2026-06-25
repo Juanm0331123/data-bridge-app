@@ -7,8 +7,8 @@ venv/
 __pycache__/
 *.py[cod]
 
-# Herramientas locales
-.agents/
+# Tokens locales persistidos
+data/tokens/*.json
 
 # SO / editor
 .DS_Store
