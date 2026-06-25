@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.db.postgresql import postgres_db
+from app.middleware.error_handler import AppError
 from app.logging import log
 
 
@@ -12,19 +13,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     try:
         log.bloque_inicio("Iniciando Data Bridge")
 
-        log.step("Inicializando conexión con PostgreSQL...")
+        log.step("Inicializando conexion con PostgreSQL...")
         postgres_db.connect()
 
         await postgres_db.check_connection()
 
         log.ok("Base de datos PostgreSQL lista.")
-        log.ok("Aplicación inicializada correctamente.")
+        log.ok("Aplicacion inicializada correctamente.")
         log.bloque_fin("Startup completo")
 
         yield
 
     except Exception as error:
-        log.error(f"Error durante el ciclo de vida de la aplicación: {error}")
+        if isinstance(error, AppError) and error.details is not None:
+            log.error(f"Error durante el ciclo de vida de la aplicacion: {error.details}")
+        else:
+            log.error(f"Error durante el ciclo de vida de la aplicacion: {error}")
+
         raise
 
     finally:
@@ -35,7 +40,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             log.ok("Recursos liberados correctamente.")
 
         except Exception as error:
-            log.error(f"Error cerrando recursos de la aplicación: {error}")
+            if isinstance(error, AppError) and error.details is not None:
+                log.error(f"Error cerrando recursos de la aplicacion: {error.details}")
+            else:
+                log.error(f"Error cerrando recursos de la aplicacion: {error}")
+
             raise
 
         finally:

@@ -10,9 +10,6 @@ __pycache__/
 # Herramientas locales
 .agents/
 
-# Archivos no versionados del bootstrap actual
-app/middleware/error-handler.py
-
 # SO / editor
 .DS_Store
 Thumbs.db

@@ -1,5 +1,6 @@
 from app.api.v1.router import router as api_v1_router
 from app.lifespan import lifespan
+from app.middleware.error_handler import ErrorHandlerMiddleware
 from app.config import settings
 from fastapi import FastAPI
 from app.logging import log
@@ -9,6 +10,8 @@ import uvicorn
 
 def create_app() -> FastAPI:
     app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
+
+    app.add_middleware(ErrorHandlerMiddleware)
 
     app.include_router(api_v1_router, prefix=settings.API_V1_PREFIX)
 
