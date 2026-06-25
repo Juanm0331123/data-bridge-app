@@ -1,0 +1,7 @@
+pydantic-settings
+uvicorn[standard]
+SQLAlchemy
+fastapi
+asyncpg
+pandas
+rich
