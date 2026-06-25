@@ -1,0 +1,18 @@
+# Entorno
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Herramientas locales
+.agents/
+
+# Archivos no versionados del bootstrap actual
+app/middleware/error-handler.py
+
+# SO / editor
+.DS_Store
+Thumbs.db
