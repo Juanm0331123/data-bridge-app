@@ -30,6 +30,7 @@ Respetar estrictamente esta estructura actual:
 - `app/db/postgresql.py`: conexión y utilidades de PostgreSQL. Solo engine, pool, sesiones y cierre de conexión. No lógica de negocio.
 - `app/integrations/zoho_analytics.py`: cliente o funciones de comunicación con Zoho Analytics API. Solo requests HTTP, headers, autenticación, manejo básico de respuestas y errores de integración. No lógica de negocio ni sincronización.
 - `app/logging.py`: logger compartido para la salida de terminal. Centraliza el formato visual de logs y debe reutilizarse desde otros archivos.
+- `app/middleware/error_handler.py`: manejo centralizado de errores HTTP. Debe devolver respuestas seguras al cliente y registrar el detalle real en terminal.
 - `app/modules/`: módulos funcionales del negocio. Cada módulo representa una capacidad concreta del sistema.
 - `docs/arquitecture-diagram.png`: referencia visual de arquitectura.
 
@@ -184,6 +185,7 @@ Uso obligatorio antes de implementar o modificar código relacionado con:
 - Usar variables de entorno para secretos.
 - Validar entradas con Pydantic.
 - No devolver errores internos crudos al cliente.
+- Registrar el error real solo en terminal mediante el logger compartido y devolver mensajes sanitizados al cliente.
 - Preparar JWT solo cuando sea necesario.
 - Cuando se implemente JWT, centralizar la lógica de seguridad y proteger rutas privadas mediante dependencias FastAPI.
 
@@ -208,6 +210,7 @@ Uso obligatorio antes de implementar o modificar código relacionado con:
 - Usar Pydantic para contratos de entrada y salida.
 - Reutilizar siempre el logger compartido de `app/logging.py` para salida en terminal.
 - No usar `print` en código del proyecto si el mensaje puede salir por el logger compartido.
+- Reutilizar el manejador compartido de `app/middleware/error_handler.py` para respuestas de error HTTP.
 - No mezclar lógica HTTP con lógica de negocio.
 - No mezclar lógica de Zoho con lógica de PostgreSQL.
 - No mezclar configuración con lógica de negocio.

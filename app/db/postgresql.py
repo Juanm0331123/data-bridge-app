@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from collections.abc import AsyncGenerator
 from sqlalchemy import text
 
+from app.middleware.error_handler import AppError
 from app.logging import log
 from app.config import settings
 
@@ -44,19 +45,30 @@ class PostgresDatabase:
 
         except SQLAlchemyError as error:
             log.error(f"Error creando engine de PostgreSQL: {error}")
-            raise RuntimeError(
-                f"Error creando engine de PostgreSQL: {error}"
+            raise AppError(
+                "No fue posible preparar la conexion con PostgreSQL.",
+                status_code=503,
+                error_code="database_engine_error",
+                details=f"Error creando engine de PostgreSQL: {error}",
             ) from error
 
         except Exception as error:
             log.error(f"Error inesperado creando engine de PostgreSQL: {error}")
-            raise RuntimeError(
-                f"Error inesperado creando engine de PostgreSQL: {error}"
+            raise AppError(
+                "No fue posible preparar la conexion con PostgreSQL.",
+                status_code=503,
+                error_code="database_engine_unexpected_error",
+                details=f"Error inesperado creando engine de PostgreSQL: {error}",
             ) from error
 
     async def check_connection(self) -> None:
         if self.engine is None:
-            raise RuntimeError("El engine de PostgreSQL no está inicializado.")
+            raise AppError(
+                "La conexion con PostgreSQL no esta disponible.",
+                status_code=503,
+                error_code="database_not_initialized",
+                details="El engine de PostgreSQL no esta inicializado.",
+            )
 
         try:
             log.step("Verificando la conexión a la base de datos PostgreSQL...")
@@ -66,20 +78,34 @@ class PostgresDatabase:
                 value = result.scalar_one()
 
                 if value != 1:
-                    raise RuntimeError("PostgreSQL respondió, pero SELECT 1 falló.")
+                    raise AppError(
+                        "La conexion con PostgreSQL no esta disponible.",
+                        status_code=503,
+                        error_code="database_healthcheck_failed",
+                        details="PostgreSQL respondio, pero SELECT 1 fallo.",
+                    )
 
             log.ok("Conexión real con PostgreSQL verificada correctamente.")
 
         except SQLAlchemyError as error:
             log.error(f"No fue posible conectar con PostgreSQL: {error}")
-            raise RuntimeError(
-                f"No fue posible conectar con PostgreSQL: {error}"
+            raise AppError(
+                "No fue posible conectar con PostgreSQL.",
+                status_code=503,
+                error_code="database_connection_error",
+                details=f"No fue posible conectar con PostgreSQL: {error}",
             ) from error
 
         except Exception as error:
+            if isinstance(error, AppError):
+                raise
+
             log.error(f"Error inesperado verificando PostgreSQL: {error}")
-            raise RuntimeError(
-                f"Error inesperado verificando PostgreSQL: {error}"
+            raise AppError(
+                "La conexion con PostgreSQL no esta disponible.",
+                status_code=503,
+                error_code="database_connection_unexpected_error",
+                details=f"Error inesperado verificando PostgreSQL: {error}",
             ) from error
 
     async def disconnect(self) -> None:
@@ -99,17 +125,30 @@ class PostgresDatabase:
 
         except SQLAlchemyError as error:
             log.error(f"Error cerrando PostgreSQL: {error}")
-            raise RuntimeError(f"Error cerrando PostgreSQL: {error}") from error
+            raise AppError(
+                "No fue posible cerrar la conexion con PostgreSQL.",
+                status_code=500,
+                error_code="database_disconnect_error",
+                details=f"Error cerrando PostgreSQL: {error}",
+            ) from error
 
         except Exception as error:
             log.error(f"Error inesperado cerrando PostgreSQL: {error}")
-            raise RuntimeError(
-                f"Error inesperado cerrando PostgreSQL: {error}"
+            raise AppError(
+                "No fue posible cerrar la conexion con PostgreSQL.",
+                status_code=500,
+                error_code="database_disconnect_unexpected_error",
+                details=f"Error inesperado cerrando PostgreSQL: {error}",
             ) from error
 
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         if self.session_factory is None:
-            raise RuntimeError("La sesión de PostgreSQL no ha sido inicializada.")
+            raise AppError(
+                "La conexion con PostgreSQL no esta disponible.",
+                status_code=503,
+                error_code="database_session_not_initialized",
+                details="La sesion de PostgreSQL no ha sido inicializada.",
+            )
 
         try:
             async with self.session_factory() as session:
@@ -117,11 +156,21 @@ class PostgresDatabase:
 
         except SQLAlchemyError as error:
             log.error(f"Error en sesión de PostgreSQL: {error}")
-            raise
+            raise AppError(
+                "No fue posible obtener una sesion de PostgreSQL.",
+                status_code=503,
+                error_code="database_session_error",
+                details=f"Error en sesion de PostgreSQL: {error}",
+            ) from error
 
         except Exception as error:
             log.error(f"Error inesperado en sesión de PostgreSQL: {error}")
-            raise
+            raise AppError(
+                "No fue posible obtener una sesion de PostgreSQL.",
+                status_code=503,
+                error_code="database_session_unexpected_error",
+                details=f"Error inesperado en sesion de PostgreSQL: {error}",
+            ) from error
 
 
 postgres_db = PostgresDatabase()
