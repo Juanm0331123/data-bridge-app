@@ -4,4 +4,5 @@ SQLAlchemy
 fastapi
 asyncpg
 pandas
+httpx
 rich
