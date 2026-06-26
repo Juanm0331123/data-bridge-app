@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.postgresql import postgres_db
-
 from app.modules.sync.schemas import (
-    DataPreviewResponse,
+    ZohoToPostgresUpsertResponse,
     PreviewPostgresTableRequest,
+    ZohoToPostgresUpsertRequest,
     PreviewZohoDataRequest,
+    DataPreviewResponse,
 )
 from app.modules.sync.service import SyncService
+from app.db.postgresql import postgres_db
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, status
 
 router = APIRouter()
 sync_service = SyncService()
@@ -34,3 +35,16 @@ async def preview_postgresql_data(
     db: AsyncSession = Depends(postgres_db.get_session),
 ) -> DataPreviewResponse:
     return await sync_service.preview_postgresql_data(payload, db)
+
+
+@router.post(
+    "/zoho-to-postgresql",
+    response_model=ZohoToPostgresUpsertResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Sincronizar Zoho Analytics hacia PostgreSQL",
+)
+async def zoho_to_postgresql(
+    payload: ZohoToPostgresUpsertRequest,
+    db: AsyncSession = Depends(postgres_db.get_session),
+) -> ZohoToPostgresUpsertResponse:
+    return await sync_service.zoho_to_postgresql(payload, db)
