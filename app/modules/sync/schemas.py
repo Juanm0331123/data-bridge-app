@@ -1,6 +1,5 @@
-from typing import Any
-
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Any
 
 
 class PreviewZohoDataRequest(BaseModel):
@@ -62,6 +61,63 @@ class PreviewPostgresTableRequest(BaseModel):
         ge=0,
         description="Cantidad de filas a omitir antes de devolver resultados.",
     )
+
+
+class ZohoToPostgresUpsertRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "workspace_id": "123456789012345678",
+                    "view_id": "123456789012345678",
+                    "target_table": "customers",
+                    "upsert_key": ["email"],
+                    "column_mapping": {
+                        "Customer Email": "email",
+                        "Customer Name": "name",
+                    },
+                }
+            ]
+        }
+    )
+
+    workspace_id: str = Field(
+        min_length=1,
+        description="ID real del workspace de Zoho Analytics.",
+        examples=["123456789012345678"],
+    )
+    view_id: str = Field(
+        min_length=1,
+        description="ID real de la vista de Zoho Analytics.",
+        examples=["123456789012345678"],
+    )
+    target_table: str = Field(
+        min_length=1,
+        description="Nombre de la tabla PostgreSQL destino del upsert.",
+        examples=["customers"],
+    )
+    upsert_key: list[str] = Field(
+        min_length=1,
+        description=(
+            "Columnas PostgreSQL que forman una unica PK o UNIQUE real para el upsert."
+        ),
+        examples=[["email"]],
+    )
+    column_mapping: dict[str, str] = Field(
+        min_length=1,
+        description="Mapa de columnas desde Zoho Analytics hacia PostgreSQL.",
+        examples=[{"Customer Email": "email", "Customer Name": "name"}],
+    )
+
+
+class ZohoToPostgresUpsertResponse(BaseModel):
+    success: bool
+    inserted: int
+    updated: int
+    total: int
+    errors_count: int
+    cant_row_zoho: int
+    cant_row_pg: int
 
 
 class DataPreviewResponse(BaseModel):
