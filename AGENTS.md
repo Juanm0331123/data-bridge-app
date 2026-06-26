@@ -270,6 +270,32 @@ Ejemplos:
 - `refactor(api): simplify router registration`
 - `perf(db): tune postgresql connection pool`
 
+### Comando `do-commit`
+
+Cuando el usuario escriba exactamente `do-commit`, se considera una instruccion explicita para preparar commits, ramas, merges y push remoto. El agente debe ejecutar automaticamente este flujo completo:
+
+1. Revisar `git status`, `git diff` y `git log --oneline -10`.
+2. Verificar que no haya secretos, tokens, `.env`, archivos de tokens locales, credenciales, `DATABASE_URL`, API keys ni datos sensibles en los cambios.
+3. Separar todos los cambios por funcionalidad, correccion o unidad logica independiente.
+4. Crear una rama local por cada unidad logica, partiendo de `main` actualizado.
+5. Llevar a cada rama solamente los cambios que correspondan a esa unidad logica.
+6. Ejecutar las validaciones disponibles o, si no es posible, explicar la razon.
+7. Hacer un commit por rama usando el formato `type(scope): message`.
+8. Fusionar cada rama en `main` con merges no interactivos.
+9. Revisar que `main` quede correcto con `git status`, `git diff`, logs recientes y validaciones disponibles.
+10. Hacer push de `main` al remoto configurado.
+11. Borrar las ramas locales creadas para ese flujo.
+12. Si alguna rama temporal fue publicada en remoto, borrar tambien esa rama remota.
+
+Reglas obligatorias para `do-commit`:
+
+- No usar `git push --force` ni variantes force.
+- No usar `git reset --hard` ni comandos destructivos sin autorizacion explicita adicional.
+- No saltar hooks.
+- No modificar ni revertir cambios ajenos salvo que el usuario lo pida explicitamente.
+- Si hay conflictos, secretos, cambios ambiguos o una separacion insegura, detenerse y preguntar antes de continuar.
+- Si no existe remoto configurado o el push falla por permisos/autenticacion, dejar `main` listo localmente y reportar el bloqueo.
+
 ## Comandos actuales
 
 Comandos verificados actualmente en el proyecto:
