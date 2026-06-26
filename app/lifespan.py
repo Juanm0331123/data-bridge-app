@@ -1,13 +1,12 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI
-
-from app.db.postgresql import postgres_db
 from app.integrations.zoho_analytics import zoho_analytics
-from app.config import settings
 from app.middleware.error_handler import AppError
+from app.db.postgresql import postgres_db
+from app.config import settings
 from app.logging import log
+
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
+from fastapi import FastAPI
 
 
 @asynccontextmanager
@@ -41,7 +40,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 f"Error durante el ciclo de vida de la aplicacion: {error.details}"
             )
         else:
-            log.error(f"Error durante el ciclo de vida de la aplicacion: {error}")
+            log.error(
+                "Error durante el ciclo de vida de la aplicacion "
+                f"| error_type={type(error).__name__}"
+            )
 
         raise
 
@@ -57,7 +59,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             if isinstance(error, AppError) and error.details is not None:
                 log.error(f"Error cerrando recursos de la aplicacion: {error.details}")
             else:
-                log.error(f"Error cerrando recursos de la aplicacion: {error}")
+                log.error(
+                    "Error cerrando recursos de la aplicacion "
+                    f"| error_type={type(error).__name__}"
+                )
 
             raise
 

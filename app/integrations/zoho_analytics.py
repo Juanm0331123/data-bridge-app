@@ -69,12 +69,18 @@ class ZohoAnalyticsClient:
             log.info("Cliente HTTP para Zoho Analytics creado correctamente.")
 
         except Exception as error:
-            log.error(f"Error al crear el cliente HTTP para Zoho Analytics: {error}")
+            log.error(
+                "Error al crear el cliente HTTP para Zoho Analytics "
+                f"| error_type={type(error).__name__}"
+            )
             raise AppError(
                 "No fue posible preparar la conexion con Zoho Analytics.",
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 error_code="zoho_client_error",
-                details=f"Error al crear el cliente HTTP para Zoho Analytics: {error}",
+                details=(
+                    "Error al crear el cliente HTTP para Zoho Analytics "
+                    f"| error_type={type(error).__name__}"
+                ),
             ) from error
 
     async def check_connection(self) -> None:
@@ -93,7 +99,10 @@ class ZohoAnalyticsClient:
                         "Zoho Analytics respondio con un formato inesperado.",
                         status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                         error_code="zoho_response_error",
-                        details=f"Respuesta inesperada en check_connection: {rows}",
+                        details=(
+                            "Respuesta inesperada en check_connection "
+                            f"| response_type={type(rows).__name__}"
+                        ),
                     )
 
             else:
@@ -107,12 +116,18 @@ class ZohoAnalyticsClient:
             if isinstance(error, AppError):
                 raise
 
-            log.error(f"Error al verificar la conexion con Zoho Analytics: {error}")
+            log.error(
+                "Error al verificar la conexion con Zoho Analytics "
+                f"| error_type={type(error).__name__}"
+            )
             raise AppError(
                 "No fue posible verificar la conexion con Zoho Analytics.",
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 error_code="zoho_connection_error",
-                details=f"Error al verificar la conexion con Zoho Analytics: {error}",
+                details=(
+                    "Error al verificar la conexion con Zoho Analytics "
+                    f"| error_type={type(error).__name__}"
+                ),
             ) from error
 
     async def disconnect(self) -> None:
@@ -130,12 +145,18 @@ class ZohoAnalyticsClient:
             log.ok("Cliente HTTP de Zoho Analytics cerrado correctamente.")
 
         except Exception as error:
-            log.error(f"Error al cerrar el cliente HTTP de Zoho Analytics: {error}")
+            log.error(
+                "Error al cerrar el cliente HTTP de Zoho Analytics "
+                f"| error_type={type(error).__name__}"
+            )
             raise AppError(
                 "No fue posible cerrar la conexion con Zoho Analytics.",
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 error_code="zoho_disconnect_error",
-                details=f"Error al cerrar el cliente HTTP de Zoho Analytics: {error}",
+                details=(
+                    "Error al cerrar el cliente HTTP de Zoho Analytics "
+                    f"| error_type={type(error).__name__}"
+                ),
             ) from error
 
     async def refresh_access_token(self) -> str:
@@ -164,7 +185,7 @@ class ZohoAnalyticsClient:
                     "No fue posible autenticar con Zoho Analytics.",
                     status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                     error_code="zoho_response_error",
-                    details=f"Respuesta sin access_token: {data}",
+                    details="Respuesta de Zoho sin access_token.",
                 )
 
             self._update_tokens(data)
@@ -173,36 +194,50 @@ class ZohoAnalyticsClient:
 
         except httpx.HTTPStatusError as error:
             log.error(
-                f"Error de estado HTTP al refrescar el access token de Zoho Analytics: {error}"
+                "Error de estado HTTP al refrescar el access token de Zoho Analytics "
+                f"| status_code={error.response.status_code}"
             )
             raise AppError(
                 "No fue posible autenticar con Zoho Analytics.",
                 status_code=error.response.status_code,
                 error_code="zoho_auth_refresh_error",
-                details=f"HTTPStatusError refrescando access token: {error}",
+                details=(
+                    "HTTPStatusError refrescando access token "
+                    f"| status_code={error.response.status_code}"
+                ),
             ) from error
 
         except httpx.RequestError as error:
             log.error(
-                f"Error de solicitud HTTP al refrescar el access token de Zoho Analytics: {error}"
+                "Error de solicitud HTTP al refrescar el access token de Zoho Analytics "
+                f"| error_type={type(error).__name__}"
             )
             raise AppError(
                 "No fue posible autenticar con Zoho Analytics.",
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 error_code="zoho_auth_refresh_error",
-                details=f"RequestError refrescando access token: {error}",
+                details=(
+                    "RequestError refrescando access token "
+                    f"| error_type={type(error).__name__}"
+                ),
             ) from error
 
         except Exception as error:
             if isinstance(error, AppError):
                 raise
 
-            log.error(f"Error al refrescar el access token de Zoho Analytics: {error}")
+            log.error(
+                "Error al refrescar el access token de Zoho Analytics "
+                f"| error_type={type(error).__name__}"
+            )
             raise AppError(
                 "No fue posible autenticar con Zoho Analytics.",
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 error_code="zoho_auth_refresh_error",
-                details=f"Error al refrescar el access token de Zoho Analytics: {error}",
+                details=(
+                    "Error al refrescar el access token de Zoho Analytics "
+                    f"| error_type={type(error).__name__}"
+                ),
             ) from error
 
     async def get_valid_token(self) -> str:
@@ -232,7 +267,7 @@ class ZohoAnalyticsClient:
                 "Zoho Analytics no devolvio un job de exportacion valido.",
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 error_code="zoho_export_job_error",
-                details=f"Respuesta sin jobId: {payload}",
+                details="Respuesta de Zoho sin jobId.",
             )
 
         log.info(
@@ -259,7 +294,7 @@ class ZohoAnalyticsClient:
                 "Zoho Analytics no devolvio una URL de descarga valida.",
                 status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                 error_code="zoho_export_download_error",
-                details=f"Respuesta sin downloadUrl: {job_payload}",
+                details="Respuesta de Zoho sin downloadUrl.",
             )
 
         download_started_at = perf_counter()
@@ -301,7 +336,10 @@ class ZohoAnalyticsClient:
             return tokens
 
         except Exception as error:
-            log.warn(f"No fue posible cargar tokens de Zoho Analytics: {error}")
+            log.warn(
+                "No fue posible cargar tokens de Zoho Analytics "
+                f"| error_type={type(error).__name__}"
+            )
             return None
 
     def save_tokens(self) -> None:
@@ -394,8 +432,9 @@ class ZohoAnalyticsClient:
                     continue
 
                 log.error(
-                    "Zoho Analytics respondio con error HTTP: "
-                    f"{error} | payload={response_payload}"
+                    "Zoho Analytics respondio con error HTTP "
+                    f"| status_code={error.response.status_code} "
+                    f"| summary={error_summary or 'sin_resumen'}"
                 )
 
                 if error_summary == "INVALID_OAUTHSCOPE":
@@ -406,7 +445,7 @@ class ZohoAnalyticsClient:
                         details=(
                             "Zoho devolvio INVALID_OAUTHSCOPE. "
                             "Regenera el refresh token con los scopes configurados en ZHA_SCOPE. "
-                            f"Payload: {response_payload}"
+                            "Respuesta externa omitida por seguridad."
                         ),
                     ) from error
 
@@ -415,18 +454,25 @@ class ZohoAnalyticsClient:
                     status_code=error.response.status_code,
                     error_code="zoho_request_error",
                     details=(
-                        "HTTPStatusError en request a Zoho Analytics. "
-                        f"Payload: {response_payload}"
+                        "HTTPStatusError en request a Zoho Analytics "
+                        f"| status_code={error.response.status_code} "
+                        f"| summary={error_summary or 'sin_resumen'}"
                     ),
                 ) from error
 
             except httpx.RequestError as error:
-                log.error(f"Error de red llamando a Zoho Analytics: {error}")
+                log.error(
+                    "Error de red llamando a Zoho Analytics "
+                    f"| error_type={type(error).__name__}"
+                )
                 raise AppError(
                     "No fue posible comunicarse con Zoho Analytics.",
                     status_code=HTTPStatus.SERVICE_UNAVAILABLE,
                     error_code="zoho_request_error",
-                    details=f"RequestError en request a Zoho Analytics: {error}",
+                    details=(
+                        "RequestError en request a Zoho Analytics "
+                        f"| error_type={type(error).__name__}"
+                    ),
                 ) from error
 
         raise AppError(
@@ -481,11 +527,22 @@ class ZohoAnalyticsClient:
     def _bulk_export_job_url(self, workspace_id: str, job_id: str) -> str:
         return f"{settings.ZHA_API_BULK_URL.rstrip('/')}/{workspace_id}/exportjobs/{job_id}"
 
-    def _safe_response_payload(self, response: httpx.Response) -> Any:
+    def _safe_response_payload(self, response: httpx.Response) -> dict[str, Any]:
+        safe_payload: dict[str, Any] = {"status_code": response.status_code}
+
         try:
-            return response.json()
+            payload = response.json()
         except ValueError:
-            return response.text
+            safe_payload["body_type"] = "text"
+            return safe_payload
+
+        if isinstance(payload, Mapping):
+            for key in ("summary", "code", "error", "message"):
+                value = payload.get(key)
+                if isinstance(value, str):
+                    safe_payload[key] = value
+
+        return safe_payload
 
     def _extract_error_summary(self, payload: Any) -> str | None:
         if not isinstance(payload, Mapping):
@@ -528,7 +585,7 @@ class ZohoAnalyticsClient:
                     details=(
                         "Export job de Zoho Analytics finalizo sin exito "
                         f"| job_id={job_id} | jobCode={job_code} "
-                        f"| payload={payload}"
+                        "| respuesta externa omitida por seguridad"
                     ),
                 )
 
@@ -550,7 +607,7 @@ class ZohoAnalyticsClient:
                 "Timeout esperando export job "
                 f"{job_id} tras "
                 f"{self.EXPORT_JOB_MAX_POLLS * self.EXPORT_JOB_POLL_INTERVAL_SECONDS:.1f} segundos. "
-                f"Ultima respuesta: {last_payload}"
+                f"Ultima respuesta omitida por seguridad | keys={list(last_payload.keys())}"
             ),
         )
 
@@ -589,7 +646,7 @@ class ZohoAnalyticsClient:
             "Zoho Analytics devolvio filas en un formato no soportado.",
             status_code=HTTPStatus.SERVICE_UNAVAILABLE,
             error_code="zoho_export_parse_error",
-            details=f"Payload no soportado: {payload}",
+            details=f"Payload no soportado | payload_type={type(payload).__name__}",
         )
 
     def _extract_mapping(self, value: Any) -> dict[str, Any]:
