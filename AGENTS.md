@@ -69,6 +69,18 @@ Reglas:
 - No crear `exceptions.py` si no hay excepciones propias del módulo.
 - No crear carpetas internas complejas desde el inicio.
 - No aplicar arquitectura hexagonal completa si el módulo todavía es pequeño.
+- En `app/modules/<module>/service.py`, debe existir una clase service por módulo.
+- Cada ruta del `router.py` debe corresponder a exactamente un método público en la clase service.
+- Si hay 3 rutas en un módulo, debe haber 3 métodos públicos en el service de ese módulo.
+- Quedan prohibidos los helpers dentro de los services: no crear métodos privados tipo `_helper`, funciones auxiliares ni extraer lógica a helpers si el usuario no lo pide explícitamente.
+- No modificar rutas, schemas ni contracts existentes sin autorización explícita.
+
+## Restricciones puntuales de la tarea Zoho preview
+
+- Para la optimización puntual de `preview_zoho_data`, está estrictamente prohibido modificar `app/modules/sync/router.py`, `app/modules/sync/schemas.py` y `app/modules/sync/service.py`.
+- Esta optimización solo puede tocar `app/integrations/zoho_analytics.py` y, si es estrictamente necesario, configuración interna relacionada con HTTP, timeouts, caché o conexión.
+- No cambiar la API pública, body, response model, nombre de endpoint ni la firma pública `zoho_analytics.export_view_data(workspace_id, view_id)`.
+- No crear helpers nuevos en services ni cambiar la estructura del módulo `sync`.
 
 ## Skills instaladas
 

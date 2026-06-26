@@ -37,6 +37,10 @@ class Settings(BaseSettings):
             f"/{self.PG_DATABASE_MV3}"
         )
 
+    @cached_property
+    def sync_jobs_enabled(self) -> bool:
+        return True
+
     # Zoho Analytics CONNECTION
     SEC_USER: str | None = None
     SEC_PASSWORD: str | None = None
@@ -60,6 +64,7 @@ class Settings(BaseSettings):
     ZHA_FILE_JOBID_JSON: str | None = None
     ZHA_FILE_TOKEN_JSON: str | None = None
     ZHA_SCOPE: str | None = None
+    ZHA_HEALTHCHECK_VIEW_ID: str | None = None
 
     ZOHO_REQUIRED: bool = True
 
