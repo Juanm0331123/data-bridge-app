@@ -594,4 +594,8 @@ Principios obligatorios:
 
 ## Licencia
 
-No se ha definido una licencia publica para este proyecto.
+Este proyecto usa la licencia MIT.
+
+Copyright (c) 2026 Juan Miguel León Gómez, Ingeniero Informático.
+
+Consulta el archivo `LICENSE` para ver los terminos completos.
