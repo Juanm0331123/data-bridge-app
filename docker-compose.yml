@@ -1,0 +1,30 @@
+services:
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: data-bridge-api:latest
+        container_name: data-bridge-api
+        restart: unless-stopped
+        env_file:
+            - .env
+        environment:
+            APP_ENV: production
+            APP_HOST: 0.0.0.0
+            APP_PORT: '8000'
+            PYTHONUNBUFFERED: '1'
+        ports:
+            - '8000:8000'
+        volumes:
+            - data_bridge_tokens:/app/data/tokens
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).read()"
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s
+
+volumes:
+    data_bridge_tokens:
