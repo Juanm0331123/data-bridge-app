@@ -35,9 +35,33 @@ class PreviewZohoDataRequest(BaseModel):
 
 
 class PreviewPostgresTableRequest(BaseModel):
-    target_table: str = Field(..., min_length=1)
-    limit: int | None = Field(default=None, ge=1)
-    offset: int = Field(default=0, ge=0)
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "target_table": "customers",
+                    "limit": 10,
+                    "offset": 0,
+                }
+            ]
+        }
+    )
+
+    target_table: str = Field(
+        min_length=1,
+        description="Nombre de la tabla PostgreSQL que se desea previsualizar.",
+        examples=["customers"],
+    )
+    limit: int | None = Field(
+        default=None,
+        ge=1,
+        description="Cantidad maxima de filas a devolver. Si se omite, devuelve desde el offset.",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Cantidad de filas a omitir antes de devolver resultados.",
+    )
 
 
 class DataPreviewResponse(BaseModel):
