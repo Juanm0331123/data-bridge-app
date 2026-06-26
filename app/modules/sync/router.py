@@ -1,8 +1,12 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.postgresql import postgres_db
 
 from app.modules.sync.schemas import (
-    PreviewZohoDataRequest,
     DataPreviewResponse,
+    PreviewPostgresTableRequest,
+    PreviewZohoDataRequest,
 )
 from app.modules.sync.service import SyncService
 
@@ -17,3 +21,16 @@ async def preview_zoho_data_route(
     payload: PreviewZohoDataRequest,
 ) -> DataPreviewResponse:
     return await sync_service.preview_zoho_data(payload)
+
+
+@router.post(
+    "/preview/postgresql",
+    response_model=DataPreviewResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Previsualizar tabla PostgreSQL",
+)
+async def preview_postgresql_data(
+    payload: PreviewPostgresTableRequest,
+    db: AsyncSession = Depends(postgres_db.get_session),
+) -> DataPreviewResponse:
+    return await sync_service.preview_postgresql_data(payload, db)

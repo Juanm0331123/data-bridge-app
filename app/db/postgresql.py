@@ -154,6 +154,9 @@ class PostgresDatabase:
             async with self.session_factory() as session:
                 yield session
 
+        except AppError:
+            raise
+
         except SQLAlchemyError as error:
             log.error(f"Error en sesión de PostgreSQL: {error}")
             raise AppError(
@@ -161,15 +164,6 @@ class PostgresDatabase:
                 status_code=503,
                 error_code="database_session_error",
                 details=f"Error en sesion de PostgreSQL: {error}",
-            ) from error
-
-        except Exception as error:
-            log.error(f"Error inesperado en sesión de PostgreSQL: {error}")
-            raise AppError(
-                "No fue posible obtener una sesion de PostgreSQL.",
-                status_code=503,
-                error_code="database_session_unexpected_error",
-                details=f"Error inesperado en sesion de PostgreSQL: {error}",
             ) from error
 
 
